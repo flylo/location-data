@@ -1,0 +1,15 @@
+steps:
+  - name: maven:3-jdk-11
+    entrypoint: mvn
+    args: ['clean', 'package']
+  - name: maven:3-jdk-11
+    entrypoint: mvn
+    args: ['test']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/location-data-278514/location-data-image', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        [[ "$BRANCH_NAME" == "master" ]] && docker push gcr.io/$PROJECT_ID/image || exit 0
