@@ -1,0 +1,120 @@
+---
+swagger: "2.0"
+info:
+  version: "v1"
+  title: "Location Data API"
+tags:
+- name: "Ping"
+- name: "Users"
+- name: "Visits"
+paths:
+  /ping:
+    get:
+      tags:
+      - "Ping"
+      summary: "Ping the service."
+      description: "Get a quick verification that the service is running. Adheres\
+        \ to the standard response codes"
+      operationId: "PingResource_ping_get"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+  /users/{userId}/visits:
+    get:
+      tags:
+      - "Users"
+      summary: "Retrieve a list of potential visits by userId and search string."
+      description: "Adheres to the standard response codes"
+      operationId: "UserResource_getUserVisits_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "searchString"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Visit"
+    post:
+      tags:
+      - "Users"
+      summary: "Submit a user visit."
+      description: "Adheres to the standard response codes"
+      operationId: "UserResource_postUserVisit_post"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/UserVisitResponse"
+  /visits/{visitId}:
+    get:
+      tags:
+      - "Visits"
+      summary: "Retrieve a single visit by visit ID."
+      description: "Adheres to the standard response codes"
+      operationId: "VisitResource_getVisit_get"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Visit"
+definitions:
+  Merchant:
+    type: "object"
+    properties:
+      merchantId:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      merchantName:
+        type: "string"
+        readOnly: true
+  User:
+    type: "object"
+    properties:
+      userId:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+  UserVisitResponse:
+    type: "object"
+    properties:
+      visitId:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      timestampMillis:
+        type: "integer"
+        format: "int64"
+        readOnly: true
+  Visit:
+    type: "object"
+    properties:
+      visitId:
+        type: "string"
+        format: "uuid"
+        readOnly: true
+      timestampMillis:
+        type: "integer"
+        format: "int64"
+        readOnly: true
+      merchant:
+        readOnly: true
+        $ref: "#/definitions/Merchant"
+      user:
+        readOnly: true
+        $ref: "#/definitions/User"
