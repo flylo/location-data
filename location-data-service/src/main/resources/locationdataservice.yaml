@@ -1,0 +1,11 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+
+cloudFirestoreConfiguration:
+  googleCloudProjectId: location-data-278514
+  collectionName: user-visits
+  readTimeoutMillis: 2000
+  writeTimeoutMillis: 2000
+  readWriteThreadpoolSize: 50

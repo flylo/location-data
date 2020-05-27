@@ -15,4 +15,5 @@ public interface UserVisitRequest {
   Merchant merchant();
 
   User user();
+
 }
