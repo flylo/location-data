@@ -1,17 +1,20 @@
 package com.current.location;
 
+import com.current.location.configuration.CloudFirestoreConfiguration;
 import io.dropwizard.Configuration;
 
 
 public class LocationDataConfiguration extends Configuration {
 
-  private String bigtableHost;
+  CloudFirestoreConfiguration cloudFirestoreConfiguration;
 
-  public String getBigtableHost() {
-    return bigtableHost;
+  public CloudFirestoreConfiguration getCloudFirestoreConfiguration() {
+    return cloudFirestoreConfiguration;
   }
 
-  public void setBigtableHost(String bigtableHost) {
-    this.bigtableHost = bigtableHost;
+  public void setCloudFirestoreConfiguration(
+      CloudFirestoreConfiguration cloudFirestoreConfiguration) {
+    this.cloudFirestoreConfiguration = cloudFirestoreConfiguration;
   }
+
 }
