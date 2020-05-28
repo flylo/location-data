@@ -43,7 +43,10 @@
             <dependency>
                 <groupId>com.current</groupId>
                 <artifactId>location-data-test-utils</artifactId>
+                <type>test-jar</type>
                 <version>${project.version}</version>
+                <classifier>tests</classifier>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.current</groupId>
@@ -220,6 +223,24 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M3</version>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.11</version>
+                <executions>
+                    <execution>
+                        <id>pull-testcontainers</id>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>current/location</repository>
+                    <tag>latest</tag>
+                    <contextDirectory>${project.basedir/../}</contextDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>

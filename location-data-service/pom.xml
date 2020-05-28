@@ -79,6 +79,8 @@
         <dependency>
             <groupId>com.current</groupId>
             <artifactId>location-data-test-utils</artifactId>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>

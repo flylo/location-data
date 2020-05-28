@@ -69,11 +69,6 @@
         </dependency>
         <dependency>
             <groupId>com.current</groupId>
-            <artifactId>location-data-test-utils</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.current</groupId>
             <artifactId>location-data-service</artifactId>
             <scope>test</scope>
         </dependency>

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class FirestoreITTest extends FirestoreIntegrationTest {
+public class FirestoreTestUtilsTest extends FirestoreIntegrationTest {
 
   @Test
   void testFirestoreEmulation() throws Exception {
