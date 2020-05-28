@@ -79,6 +79,8 @@
         <dependency>
             <groupId>com.current</groupId>
             <artifactId>location-data-test-utils</artifactId>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -94,7 +96,7 @@
                     <apiSources>
                         <apiSource>
                             <!--TODO: does this work?-->
-                            <swaggerDirectory>${parent.basedir}</swaggerDirectory>
+                            <swaggerDirectory>${project.basedir/../}</swaggerDirectory>
                             <outputFormats>yaml</outputFormats>
                             <operationIdFormat>{{className}}_{{methodName}}_{{httpMethod}}</operationIdFormat>
                             <locations>
@@ -149,6 +151,24 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.11</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>current/location</repository>
+                    <tag>latest</tag>
+                    <contextDirectory>${project.basedir/../}</contextDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>
