@@ -7,8 +7,10 @@ searchConfiguration:
   maxLevenshteinDistance: 3
 
 cloudFirestoreConfiguration:
-  googleCloudProjectId: location-data-278514
+  googleCloudProjectId: test-project
+  cloudFirestoreHost: localhost:8088
   collectionName: user-visits
   readTimeoutMillis: 2000
   writeTimeoutMillis: 2000
   readWriteThreadpoolSize: 50
+  fixedCredentials: true

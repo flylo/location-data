@@ -35,7 +35,7 @@ public class LocationDataService extends Application<LocationDataConfiguration> 
                   Environment environment) {
     final FirestoreIO firestore = new FirestoreIO(configuration.getCloudFirestoreConfiguration(), OBJECT_MAPPER);
     final PingResource pingResource = new PingResource();
-    final UserResource userResource = new UserResource(firestore);
+    final UserResource userResource = new UserResource(firestore, configuration.getSearchConfiguration());
     final VisitResource visitResource = new VisitResource(firestore);
     final FirestoreHealthCheck firestoreHealthCheck = new FirestoreHealthCheck(firestore);
     environment.healthChecks().register("Firestore Health", firestoreHealthCheck);

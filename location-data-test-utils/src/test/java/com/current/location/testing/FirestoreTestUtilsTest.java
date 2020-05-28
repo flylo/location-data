@@ -1,5 +1,6 @@
 package com.current.location.testing;
 
+import com.google.api.gax.rpc.FixedHeaderProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
@@ -15,16 +16,13 @@ public class FirestoreTestUtilsTest extends FirestoreIntegrationTest {
 
   @Test
   void testFirestoreEmulation() throws Exception {
-    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-    FirebaseOptions options = new FirebaseOptions.Builder()
-        .setCredentials(credentials)
-        .setProjectId(getFirestoreGcpProject())
-        .setFirestoreOptions(FirestoreOptions.newBuilder()
-            .setHost(getFirestoreHost())
-            .build())
-        .build();
-    FirebaseApp app = FirebaseApp.initializeApp(options);
-    Firestore firestore = FirestoreClient.getFirestore(app);
+    Firestore firestore = FirestoreOptions.getDefaultInstance()
+        .toBuilder()
+        .setHeaderProvider(FixedHeaderProvider.create(
+            "Authorization", "Bearer owner"
+        ))
+        .build()
+        .getService();
     firestore.collection("lol").document().create(Map.of("key", "value")).get(10, TimeUnit.SECONDS);
     int numResults = firestore.collection("lol").whereEqualTo("key", "value")
         .get().get().getDocuments().size();
