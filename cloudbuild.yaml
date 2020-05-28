@@ -13,7 +13,7 @@ steps:
   - name: 'gcr.io/cloud-builders/kubectl'
     entrypoint: 'bash'
     env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-east1'
+      - 'CLOUDSDK_COMPUTE_ZONE=us-east1-c'
       - 'CLOUDSDK_CONTAINER_CLUSTER=location-data-cluster'
     args:
       - '-c'
