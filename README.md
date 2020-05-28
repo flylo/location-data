@@ -87,17 +87,20 @@ if we have `userId`s with incredibly large transaction histories. To avoid issue
 the user visit history by a `maxLookbackHrs`. In practice, if this API is being used to do fraud detection,
 then we don't need the entire user history. We'd likely just need the last few hours or days of transactions. We would
 obviously want to verify this empirically, however, prior to putting something like this into production.
-- The fuzzy-matching is currently configurable in the
-[Dropwizard configuration file](location-data-service/src/main/resources/locationdataservice.yaml). We coul also
+- The "fuzziness" parameter (maximum allowable [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance)
+between merchant names) of the fuzzy-matching is currently configurable in the
+[Dropwizard configuration file](location-data-service/src/main/resources/locationdataservice.yaml). We could also
 put this into the API easily, but it seemed like doing so would un-necessarily expose the internals of the
-service to an outside caller. 
-- I chose [Google Cloud Firestore](https://cloud.google.com/firestore) for several reasons:
-   1) It does automatic indexing of all non-map, non-array type fields (see [documentation](https://firebase.google.com/docs/firestore/query-data/index-overview#single-field-indexes))
+service to an outside caller.
+- I chose [Google Cloud Firestore](https://cloud.google.com/firestore) as our persistence layer for several reasons:
+   1) It does automatic indexing of all non-map, non-array type fields
+      (see [documentation](https://firebase.google.com/docs/firestore/query-data/index-overview#single-field-indexes)
       for details on Firestore's indexing support). This is incredibly helpful for us so that we can index
       our data on both the `visitId` and the `userId` in a single transaction. It also has a friendly pricing model
-      for this type of project. 
+      for this type of project, and the ascending/descending indexing allows for performant ">=" and "<=" queries,
+      which we need for the max-lookback.
    2) [Bigtable](https://cloud.google.com/bigtable) was WAY too expensive (~$500/month for the cheapest single-node deployment).
-      I'd much prefer to use Bigtable for a few reasons. Bigtable's lighting-fast range scan ability would help us subset the user
+      I'd usually prefer to use Bigtable for a few reasons. Bigtable's lighting-fast range scan ability would help us subset the user
       visit history over time and keep the in-process fuzzy-matching logic from getting too computationally expensive.
       Also, the weaker consistency guarantees mean that we can have incredibly high throughput writes, which
       is usually good for feature stores (assuming we'd want an ML model or something to use this data).
@@ -105,13 +108,13 @@ service to an outside caller.
       functionality became a core use-case, then I'd re-consider.
 - The production Firestore database has a composite index set up on the fields `userId` and `timestampMillis` to support
 joint sub-setting. The [Firestore Emulator](https://github.com/maximelebastard/firestore-emulator-docker) does
-not support the creation of composite indexes, because they can only be made in the UI.
-- This repository is set up so that open API yaml specifications are generated programmatically from the resources. We
-then compile those specs into java classes that can be used to call our service. This allows us to specify all documentation
-and client specification directly in the code.
+not support the creation of composite indexes, but it doesn't affect the tests.
+- This repository is set up so that OpenAPI yaml specifications are generated programmatically from the API java resources. We
+then compile those specs into java clients in the `location-data-client` package. Specifying all documentation and
+client definition logic in the API itself cuts down on the number of moving pieces that need to be maintained.
 - In the interest of time, I've prioritized integration testing, since all of the code is implicitly covered
 in these tests. In a perfect world, classes like
 [`FirestoreIO`](location-data-service/src/main/java/com/current/location/persistence/FirestoreIO.java)
-would have their own independent tests. 
+would have their own independent unit tests. 
 - If this was likely to become a large service that handled a variety of operations,
 then I would set it up with compile-time dependency injection (using [dagger](https://github.com/google/dagger)).
