@@ -21,7 +21,10 @@ more time-intensive infrastructure effort on my part.
 TODO: this isn't necessary
 `gcloud builds submit --tag gcr.io/location-data-278514/location-data-image`
 
+TODO: latest doesn't work
 `gcloud config set compute/zone us-east1`
 `gcloud container clusters create location-data-cluster --num-nodes=1`
-`kubectl create deployment location-data-service --image=gcr.io/location-data-278514/location-data-image:latest`
+`gcloud container clusters get-credentials location-data-cluster`
+`kubectl create deployment location-data-service --image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
 `kubectl expose deployment location-data-service --type=LoadBalancer --port 80 --target-port 8080`
+`kubectl set image deployment/location-data-service location-data-image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
