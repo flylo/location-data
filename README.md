@@ -28,3 +28,7 @@ TODO: latest doesn't work
 `kubectl create deployment location-data-service --image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
 `kubectl expose deployment location-data-service --type=LoadBalancer --port 80 --target-port 8080`
 `kubectl set image deployment/location-data-service location-data-image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
+
+
+# Curl
+`curl -X GET http://35.227.13.18:80/ping`
