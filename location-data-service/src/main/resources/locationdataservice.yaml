@@ -3,6 +3,9 @@ server:
     - type: http
       port: 8080
 
+swagger:
+  resourcePackage: com.current.location.resources
+
 searchConfiguration:
   maxLevenshteinDistance: 3
 

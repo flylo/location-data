@@ -1,34 +1,80 @@
 # location-data
+An API for reading and writing banking transaction data.
 
-# NOTES
-- If this was likely to become a large service that handles many different types of data
-requests, then I would set it up with dagger2.
-- Bigtable costs lots of money. Using Firestore.
-- Using compute engine default instance for all service account shit
-- Needs GOOGLE_APPLICATION_CREDENTIALS specified
-- I don't love Immutables, but they're better than POJOs and setting up protobufs seemed like more effort
-than was worth it for a take-home assignment
-- [Indexing in firestore](https://firebase.google.com/docs/firestore/query-data/index-overview#single-field-indexes)
-- [Indexing best practices](https://firebase.google.com/docs/firestore/query-data/index-overview#indexing_best_practices)
-    - google suggests turning off auto-indexing for several specific use cases, none of which _seem_ to apply here
-    - 500 writes per second per collection
-    - 20k index entries per document (each field generates 2, one ascending one descending)
-- If the fuzziness is really important, maybe something like Elasticsearch would be better, but this would have been a
-more time-intensive infrastructure effort on my part.
-- Docker is a pre-requisite
+## Usage
 
-# Build
-TODO: this isn't necessary
-`gcloud builds submit --tag gcr.io/location-data-278514/location-data-image`
+### Submit a visit
+The following endpoint is exposed to submit a user transaction location: 
+```
+POST /users/{USER_UUID}/visits '{...}'
+```
 
-TODO: latest doesn't work
-`gcloud config set compute/zone us-east1`
-`gcloud container clusters create location-data-cluster --num-nodes=1`
-`gcloud container clusters get-credentials location-data-cluster`
-`kubectl create deployment location-data-service --image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
-`kubectl expose deployment location-data-service --type=LoadBalancer --port 80 --target-port 8080`
-`kubectl set image deployment/location-data-service location-data-image=gcr.io/location-data-278514/location-data-image:bbfe1b99fd5e8a41e994dbace8b6bbb1c187098f`
+An example of how to use this in production is as follows:
+```bash
+curl -H 'Content-Type: application/json' -X POST -d '
+{
+  "merchant" : {
+    "merchantId" : "c638f5e8-c256-4147-90e1-7973b3f2e3f2",
+    "merchantName" : "Something"
+  },
+  "user" : {
+    "userId" : "a5f72426-0d69-445d-89f2-6efabdd7f1f8"
+  }
+}' http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits
+```
 
+### Retrieve a list of potential visits by userId and a search string
+The following endpoint is exposed to fetch user transaction histories by userId, max lookback window, and an optional
+search string:
+```
+GET /users/{USER_UUID}/visits?searchString={SEARCH_QUERY}?maxLookbackHrs={LOOKBACK_HRS}
+```
 
-# Curl
-`curl -X GET http://35.227.13.18:80/ping`
+An example of how to use this in production is as follows:
+```bash
+curl -X GET http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits?searchString=Something&maxLookbackHrs=10
+```
+
+The max lookback window exists to allow for efficient filtering of visits.
+
+### Retrieve a single visit by visitId
+The following endpoint is exposed to fetch visits by their ID:
+```
+GET /visits/{VISIT_UUID}
+```
+
+An example of how to use this in production is as follows:
+```bash
+curl -X GET http://34.74.53.63/visits/33dd6314-e9fa-48d5-be9b-4b189f05e660
+```
+
+### Ping the service
+The following endpoint allows you to quickly check if the service is deployed:
+```
+GET /ping
+```
+
+An example of how to use this in production is as follows:
+```bash
+curl -X GET http://34.74.53.63/ping
+```
+The user should receive a "PONG".
+
+## CI/CD
+Continuous Integration is done via [Google Cloud Build](https://cloud.google.com/cloud-build).
+The configuration for build/test/deployment can be found [here](cloudbuild.yaml).
+
+## Deployment
+This service is deployed with [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine).
+The cluster was built via the script at [`scripts/cluster-create.sh`](scripts/cluster-create.sh).
+In order to run that script, the user will need the Google Cloud SDK installed (see below in "Local Development").
+
+## Local Development
+In order to develop in this repository, you will need the following tools set up locally:
+
+- [Google Cloud SDK](https://cloud.google.com/sdk) should be installed, along with the `gcloud` CLI.
+- [Java11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+- [Docker](https://www.docker.com/) ([Docker for Mac](https://docs.docker.com/docker-for-mac/install/) is especially helpful)
+- [Apache Maven 3](https://maven.apache.org/)
+- Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of the GCP json credentials file 
+([see documentation here](https://cloud.google.com/docs/authentication/getting-started)).

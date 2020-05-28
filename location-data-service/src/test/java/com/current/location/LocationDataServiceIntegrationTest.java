@@ -104,11 +104,12 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
     writeUserVisit(userId, "Starbucks");
     // Set clock to hour 2 + 1 millisecond
     DateTimeUtils.setCurrentMillisFixed(2 * 1000 * 60 * 60 + 1);
-    expectedVisitIds.add(writeUserVisit(userId, "Burger King"));
-    expectedVisitIds.add(writeUserVisit(userId, "Wendy's"));
+    expectedVisitIds.add(writeUserVisit(userId, "Starbucks"));
+    expectedVisitIds.add(writeUserVisit(userId, "Starbucks"));
     // Fetch visits with 1 hour lookback cutoff
     List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits")
         .queryParam("maxLookbackHrs", 1)
+        .queryParam("searchString", "Starbucks")
         .request()
         .get()
         .readEntity(new GenericType<>() {

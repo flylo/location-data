@@ -1,5 +1,6 @@
 package com.current.location.configuration;
 
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import javax.annotation.Nullable;
 
 public class CloudFirestoreConfiguration {
@@ -67,4 +68,5 @@ public class CloudFirestoreConfiguration {
   public void setFixedCredentials(boolean fixedCredentials) {
     this.fixedCredentials = fixedCredentials;
   }
+
 }
