@@ -26,8 +26,8 @@ curl -H 'Content-Type: application/json' -X POST -d '
 ```
 
 ### Retrieve a list of potential visits by userId and a search string
-The following endpoint is exposed to fetch user transaction histories by userId, max lookback window, and an optional
-search string:
+The following endpoint is exposed to fetch user transaction histories by userId, an optional max lookback window (in hours),
+and an optional search string:
 ```
 GET /users/{USER_UUID}/visits?searchString={SEARCH_QUERY}?maxLookbackHrs={LOOKBACK_HRS}
 ```
@@ -115,6 +115,10 @@ client definition logic in the API itself cuts down on the number of moving piec
 - In the interest of time, I've prioritized integration testing, since all of the code is implicitly covered
 in these tests. In a perfect world, classes like
 [`FirestoreIO`](location-data-service/src/main/java/com/current/location/persistence/FirestoreIO.java)
-would have their own independent unit tests. 
+would have their own independent unit tests.
+- I'm relying on the external IP address of the kubernetes cluster `LoadBalancer`. Ideally, we'd have this hosted in a
+VPC with service discovery or DNS that would allow us to reach the service without calling the IP directly.
+- Ideally we would be communicating with this service over HTTPS, possibly through a nginx proxy that could handle
+SSL termination for us. This seemed like overkill for this particular project, however.
 - If this was likely to become a large service that handled a variety of operations,
 then I would set it up with compile-time dependency injection (using [dagger](https://github.com/google/dagger)).
