@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,13 @@ public class LocationDataService extends Application<LocationDataConfiguration> 
 
   @Override
   public void initialize(Bootstrap<LocationDataConfiguration> bootstrap) {
-    // TODO: do
+    bootstrap.addBundle(new SwaggerBundle<>() {
+      @Override
+      protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
+          LocationDataConfiguration configuration) {
+        return configuration.getSwaggerBundleConfiguration();
+      }
+    });
   }
 
   @Override
