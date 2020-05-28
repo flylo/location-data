@@ -1,6 +1,8 @@
 steps:
   - name: maven:3-jdk-11
     entrypoint: mvn
+    env:
+      - 'TESTCONTAINERS_RYUK_DISABLED=true'
     args: ['clean', 'package']
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/location-data-278514/location-data-image:$COMMIT_SHA', '.']
