@@ -1,10 +1,13 @@
 package com.current.location.testing;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
+@ExtendWith(FirestoreAfterEachExtension.class)
+@ExtendWith(FirestoreEmulatorHostPatchExtension.class)
 public abstract class FirestoreIntegrationTest {
   private static final String FIRESTORE_CONTAINER_NAME = "pathmotion/firestore-emulator-docker";
   private static final int FIRESTORE_PORT = 8088;
@@ -21,4 +24,5 @@ public abstract class FirestoreIntegrationTest {
   public static String getFirestoreGcpProject() {
     return FIRESTORE_PROJECT_ID;
   }
+
 }

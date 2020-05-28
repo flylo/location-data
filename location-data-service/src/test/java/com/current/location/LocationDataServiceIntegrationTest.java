@@ -1,32 +1,38 @@
 package com.current.location;
 
+import static com.current.location.test.utils.RequestUtils.userVisitRequest;
 import static javax.ws.rs.client.Entity.json;
 
-import com.current.location.core.ImmutableMerchant;
-import com.current.location.core.ImmutableUser;
-import com.current.location.request.ImmutableUserVisitRequest;
-import com.current.location.request.UserVisitRequest;
-import com.current.location.response.ImmutableUserVisitResponse;
+import com.current.location.extensions.JodaClockResetExtension;
 import com.current.location.response.UserVisitResponse;
+import com.current.location.response.VisitResponse;
 import com.current.location.testing.FirestoreIntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.ClientProperties;
+import org.joda.time.DateTimeUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({DropwizardExtensionsSupport.class})
+@ExtendWith({DropwizardExtensionsSupport.class, JodaClockResetExtension.class})
 public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest {
-  private static final int TIMEOUT_MILLIS = 10_000;
+  private static final int TIMEOUT_MILLIS = 10000_000;
 
   public static final DropwizardAppExtension<LocationDataConfiguration> DROPWIZARD =
       new DropwizardAppExtension<>(LocationDataService.class,
           "src/main/resources/locationdataservice.yaml",
+          ConfigOverride.config("searchConfiguration.maxLevenshteinDistance", String.valueOf(3)),
           ConfigOverride.config("cloudFirestoreConfiguration.googleCloudProjectId", getFirestoreGcpProject()),
           ConfigOverride.config("cloudFirestoreConfiguration.cloudFirestoreHost", getFirestoreHost()),
           ConfigOverride.config("cloudFirestoreConfiguration.readTimeoutMillis", String.valueOf(TIMEOUT_MILLIS)),
@@ -42,22 +48,91 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
   @Test
   void testWriteUserVisit() {
     UUID userId = UUID.randomUUID();
-    UserVisitRequest userVisitRequest = ImmutableUserVisitRequest.builder()
-        .user(ImmutableUser.builder()
-            .userId(userId)
-            .build())
-        .merchant(ImmutableMerchant.builder()
-            .merchantId(UUID.randomUUID())
-            .merchantName("Troll Merchant")
-            .build())
-        .build();
-    UserVisitResponse response = webTarget("/users/" + userId.toString() + "/visits").request()
-        .post(json(userVisitRequest))
-        .readEntity(ImmutableUserVisitResponse.class);
-    Assertions.assertNotNull(response.visitId());
+    UUID visitId = writeUserVisit(userId, "Lol");
+    Assertions.assertNotNull(visitId);
   }
 
-  protected WebTarget webTarget(String endpoint) {
+  @Test
+  void testReadUserVisits() {
+    UUID userId = UUID.randomUUID();
+    Set<UUID> expectedVisitIds = new HashSet<>();
+    for (int i = 0; i < 10; i++) {
+      UUID visitId = writeUserVisit(userId, "Lol");
+      expectedVisitIds.add(visitId);
+    }
+    List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits").request()
+        .get()
+        .readEntity(new GenericType<>() {
+        });
+    Set<UUID> actualVisitIds = visits.stream().map(VisitResponse::visitId).collect(Collectors.toSet());
+    Assertions.assertEquals(expectedVisitIds, actualVisitIds);
+  }
+
+  @Test
+  void testFuzzySearchUserVisits() {
+    String searchTerm = "Starbucks";
+    UUID userId = UUID.randomUUID();
+    Set<UUID> expectedVisitIds = new HashSet<>();
+    // Write some matching visits for this user
+    expectedVisitIds.add(writeUserVisit(userId, "Starbucks"));
+    expectedVisitIds.add(writeUserVisit(userId, "Star Bucks"));
+    expectedVisitIds.add(writeUserVisit(userId, "stArbuck$"));
+    // And some non-matching visits for this user
+    writeUserVisit(userId, "Wendy's");
+    writeUserVisit(userId, "Wendys");
+    // And some visits for some random other users
+    writeUserVisit(UUID.randomUUID(), "Starbucks");
+    writeUserVisit(UUID.randomUUID(), "Starbucks");
+
+    List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits")
+        .queryParam("searchString", searchTerm)
+        .request()
+        .get()
+        .readEntity(new GenericType<>() {
+        });
+    Set<UUID> actualVisitIds = visits.stream().map(VisitResponse::visitId).collect(Collectors.toSet());
+    Assertions.assertEquals(expectedVisitIds, actualVisitIds);
+  }
+
+  @Test
+  void testUserVisitLookbackWindow() {
+    UUID userId = UUID.randomUUID();
+    Set<UUID> expectedVisitIds = new HashSet<>();
+    // Set clock to hour 1
+    DateTimeUtils.setCurrentMillisFixed(1000 * 60 * 60);
+    writeUserVisit(userId, "Starbucks");
+    writeUserVisit(userId, "Starbucks");
+    // Set clock to hour 2 + 1 millisecond
+    DateTimeUtils.setCurrentMillisFixed(2 * 1000 * 60 * 60 + 1);
+    expectedVisitIds.add(writeUserVisit(userId, "Burger King"));
+    expectedVisitIds.add(writeUserVisit(userId, "Wendy's"));
+    // Fetch visits with 1 hour lookback cutoff
+    List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits")
+        .queryParam("maxLookbackHrs", 1)
+        .request()
+        .get()
+        .readEntity(new GenericType<>() {
+        });
+    Set<UUID> actualVisitIds = visits.stream().map(VisitResponse::visitId).collect(Collectors.toSet());
+    Assertions.assertEquals(expectedVisitIds, actualVisitIds);
+  }
+
+  @Test
+  void testGetVisits() {
+    UUID visitId = writeUserVisit(UUID.randomUUID(), "Starbucks");
+    VisitResponse response = webTarget("/visits/" + visitId.toString()).request().get()
+        .readEntity(VisitResponse.class);
+    Assertions.assertEquals(visitId, response.visitId());
+  }
+
+  private UUID writeUserVisit(UUID userId, String merchantName) {
+    Response response = webTarget("/users/" + userId.toString() + "/visits").request()
+        .post(json(userVisitRequest(userId, merchantName)));
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    return response.readEntity(UserVisitResponse.class).visitId();
+  }
+
+  private WebTarget webTarget(String endpoint) {
     Client client = DROPWIZARD.client();
     int port = 8080;
     // Make these timeouts long so we don't throw exceptions while debugging in breakpoints

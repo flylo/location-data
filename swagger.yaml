@@ -32,10 +32,20 @@ paths:
       produces:
       - "application/json"
       parameters:
+      - name: "userId"
+        in: "path"
+        required: true
+        type: "string"
+        format: "uuid"
       - name: "searchString"
         in: "query"
         required: false
         type: "string"
+      - name: "maxLookbackHrs"
+        in: "query"
+        required: false
+        type: "integer"
+        format: "int32"
       responses:
         200:
           description: "successful operation"
@@ -51,7 +61,12 @@ paths:
       operationId: "UserResource_postUserVisit_post"
       produces:
       - "application/json"
-      parameters: []
+      parameters:
+      - name: "userId"
+        in: "path"
+        required: true
+        type: "string"
+        format: "uuid"
       responses:
         200:
           description: "successful operation"
@@ -66,7 +81,12 @@ paths:
       operationId: "VisitResource_getVisit_get"
       produces:
       - "application/json"
-      parameters: []
+      parameters:
+      - name: "visitId"
+        in: "path"
+        required: true
+        type: "string"
+        format: "uuid"
       responses:
         200:
           description: "successful operation"
@@ -82,13 +102,6 @@ definitions:
         readOnly: true
       merchantName:
         type: "string"
-        readOnly: true
-  User:
-    type: "object"
-    properties:
-      userId:
-        type: "string"
-        format: "uuid"
         readOnly: true
   UserVisitResponse:
     type: "object"
@@ -108,6 +121,10 @@ definitions:
         type: "string"
         format: "uuid"
         readOnly: true
+      userId:
+        type: "string"
+        format: "uuid"
+        readOnly: true
       timestampMillis:
         type: "integer"
         format: "int64"
@@ -115,6 +132,3 @@ definitions:
       merchant:
         readOnly: true
         $ref: "#/definitions/Merchant"
-      user:
-        readOnly: true
-        $ref: "#/definitions/User"

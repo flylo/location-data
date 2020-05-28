@@ -9,6 +9,7 @@ public class CloudFirestoreConfiguration {
   private int readTimeoutMillis;
   private int writeTimeoutMillis;
   private int readWriteThreadpoolSize;
+  private boolean fixedCredentials;
 
   public String getGoogleCloudProjectId() {
     return googleCloudProjectId;
@@ -57,5 +58,13 @@ public class CloudFirestoreConfiguration {
 
   public void setReadWriteThreadpoolSize(int readWriteThreadpoolSize) {
     this.readWriteThreadpoolSize = readWriteThreadpoolSize;
+  }
+
+  public boolean isFixedCredentials() {
+    return fixedCredentials;
+  }
+
+  public void setFixedCredentials(boolean fixedCredentials) {
+    this.fixedCredentials = fixedCredentials;
   }
 }
