@@ -15,7 +15,7 @@ import org.immutables.value.Value;
 public interface Visit {
   UUID visitId();
 
-  UUID userId();
+  String userId();
 
   Long timestampMillis();
 

@@ -36,7 +36,6 @@ paths:
         in: "path"
         required: true
         type: "string"
-        format: "uuid"
       - name: "searchString"
         in: "query"
         required: false
@@ -66,7 +65,6 @@ paths:
         in: "path"
         required: true
         type: "string"
-        format: "uuid"
       responses:
         200:
           description: "successful operation"
@@ -98,7 +96,6 @@ definitions:
     properties:
       merchantId:
         type: "string"
-        format: "uuid"
         readOnly: true
       merchantName:
         type: "string"
@@ -123,7 +120,6 @@ definitions:
         readOnly: true
       userId:
         type: "string"
-        format: "uuid"
         readOnly: true
       timestampMillis:
         type: "integer"

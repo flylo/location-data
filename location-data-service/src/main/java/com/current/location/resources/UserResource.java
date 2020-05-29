@@ -53,7 +53,7 @@ public class UserResource {
       response = UserVisitResponse.class
   )
   public UserVisitResponse postUserVisit(UserVisitRequest userVisitRequest,
-                                         @PathParam("userId") UUID userId) {
+                                         @PathParam("userId") String userId) {
     validateUserVisitPostRequest(userId, userVisitRequest);
     UUID visitId = UUID.randomUUID();
     long now = DateTime.now().getMillis();
@@ -79,7 +79,7 @@ public class UserResource {
       response = Visit.class,
       responseContainer = "List"
   )
-  public List<VisitResponse> getUserVisits(@PathParam("userId") UUID userId,
+  public List<VisitResponse> getUserVisits(@PathParam("userId") String userId,
                                            @QueryParam("searchString") @Nullable String searchString,
                                            @QueryParam("maxLookbackHrs") @Nullable Integer maxLookbackHrs) {
     // NOTE: we have this time filter here because Firestore doesn't have native fuzzy matching. As such,
@@ -87,7 +87,7 @@ public class UserResource {
     //       we'd probably want to only grab the last n days or hours of transactions
     long minTimestampMillis = validateAndConvertLookback(maxLookbackHrs);
     // First grab the user history
-    Stream<Visit> visits = firestore.whereQueryWithTimeFilter(USER_ID_FIELD, userId.toString(),
+    Stream<Visit> visits = firestore.whereQueryWithTimeFilter(USER_ID_FIELD, userId,
         TIMESTAMP_FIELD, minTimestampMillis, Visit.class);
     // Filter by fuzzy-match if necessary
     if (searchString == null) {

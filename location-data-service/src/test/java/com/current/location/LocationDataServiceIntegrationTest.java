@@ -47,20 +47,20 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
 
   @Test
   void testWriteUserVisit() {
-    UUID userId = UUID.randomUUID();
+    String userId = UUID.randomUUID().toString();
     UUID visitId = writeUserVisit(userId, "Lol");
     Assertions.assertNotNull(visitId);
   }
 
   @Test
   void testReadUserVisits() {
-    UUID userId = UUID.randomUUID();
+    String userId = UUID.randomUUID().toString();
     Set<UUID> expectedVisitIds = new HashSet<>();
     for (int i = 0; i < 10; i++) {
       UUID visitId = writeUserVisit(userId, "Lol");
       expectedVisitIds.add(visitId);
     }
-    List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits").request()
+    List<VisitResponse> visits = webTarget("/users/" + userId + "/visits").request()
         .get()
         .readEntity(new GenericType<>() {
         });
@@ -71,7 +71,7 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
   @Test
   void testFuzzySearchUserVisits() {
     String searchTerm = "Starbucks";
-    UUID userId = UUID.randomUUID();
+    String userId = UUID.randomUUID().toString();
     Set<UUID> expectedVisitIds = new HashSet<>();
     // Write some matching visits for this user
     expectedVisitIds.add(writeUserVisit(userId, "Starbucks"));
@@ -81,8 +81,8 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
     writeUserVisit(userId, "Wendy's");
     writeUserVisit(userId, "Wendys");
     // And some visits for some random other users
-    writeUserVisit(UUID.randomUUID(), "Starbucks");
-    writeUserVisit(UUID.randomUUID(), "Starbucks");
+    writeUserVisit(UUID.randomUUID().toString(), "Starbucks");
+    writeUserVisit(UUID.randomUUID().toString(), "Starbucks");
 
     List<VisitResponse> visits = webTarget("/users/" + userId.toString() + "/visits")
         .queryParam("searchString", searchTerm)
@@ -96,7 +96,7 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
 
   @Test
   void testUserVisitLookbackWindow() {
-    UUID userId = UUID.randomUUID();
+    String userId = UUID.randomUUID().toString();
     Set<UUID> expectedVisitIds = new HashSet<>();
     // Set clock to hour 1
     DateTimeUtils.setCurrentMillisFixed(1000 * 60 * 60);
@@ -120,13 +120,13 @@ public class LocationDataServiceIntegrationTest extends FirestoreIntegrationTest
 
   @Test
   void testGetVisits() {
-    UUID visitId = writeUserVisit(UUID.randomUUID(), "Starbucks");
+    UUID visitId = writeUserVisit(UUID.randomUUID().toString(), "Starbucks");
     VisitResponse response = webTarget("/visits/" + visitId.toString()).request().get()
         .readEntity(VisitResponse.class);
     Assertions.assertEquals(visitId, response.visitId());
   }
 
-  private UUID writeUserVisit(UUID userId, String merchantName) {
+  private UUID writeUserVisit(String userId, String merchantName) {
     Response response = webTarget("/users/" + userId.toString() + "/visits").request()
         .post(json(userVisitRequest(userId, merchantName)));
     Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());

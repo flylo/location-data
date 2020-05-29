@@ -116,6 +116,8 @@ client definition logic in the API itself cuts down on the number of moving piec
 in these tests. In a perfect world, classes like
 [`FirestoreIO`](location-data-service/src/main/java/com/current/location/persistence/FirestoreIO.java)
 would have their own independent unit tests.
+- Merchant and user IDs are Strings since the prompt claims they come from a third-party provider. We can't assume them
+to be UUIDs.
 - I'm relying on the external IP address of the kubernetes cluster `LoadBalancer`. Ideally, we'd have this hosted in a
 VPC with service discovery or DNS that would allow us to reach the service without calling the IP directly.
 - Ideally we would be communicating with this service over HTTPS, possibly through a nginx proxy that could handle

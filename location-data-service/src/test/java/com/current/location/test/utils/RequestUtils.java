@@ -8,17 +8,17 @@ import java.util.UUID;
 
 public class RequestUtils {
 
-  public static UserVisitRequest userVisitRequest(UUID userId) {
+  public static UserVisitRequest userVisitRequest(String userId) {
     return userVisitRequest(userId, "Troll Merchant");
   }
 
-  public static UserVisitRequest userVisitRequest(UUID userId, String merchantName) {
+  public static UserVisitRequest userVisitRequest(String userId, String merchantName) {
     return ImmutableUserVisitRequest.builder()
         .user(ImmutableUser.builder()
             .userId(userId)
             .build())
         .merchant(ImmutableMerchant.builder()
-            .merchantId(UUID.randomUUID())
+            .merchantId(UUID.randomUUID().toString())
             .merchantName(merchantName)
             .build())
         .build();

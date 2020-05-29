@@ -3,7 +3,6 @@ package com.current.location.core;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.UUID;
 import org.immutables.value.Value;
 
 
@@ -13,6 +12,6 @@ import org.immutables.value.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public interface User {
 
-  UUID userId();
+  String userId();
 
 }
