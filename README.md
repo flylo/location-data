@@ -22,7 +22,7 @@ curl -H 'Content-Type: application/json' -X POST -d '
   "user" : {
     "userId" : "a5f72426-0d69-445d-89f2-6efabdd7f1f8"
   }
-}' http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits
+}' "http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits"
 ```
 
 ### Retrieve a list of potential visits by userId and a search string
@@ -34,7 +34,7 @@ GET /users/{USER_UUID}/visits?searchString={SEARCH_QUERY}?maxLookbackHrs={LOOKBA
 
 An example of how to use this in production is as follows:
 ```bash
-curl -X GET http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits?searchString=Something&maxLookbackHrs=10
+curl -X GET "http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visits?searchString=Something&maxLookbackHrs=10"
 ```
 
 The max lookback window exists to allow for efficient filtering of visits.
@@ -47,7 +47,7 @@ GET /visits/{VISIT_UUID}
 
 An example of how to use this in production is as follows:
 ```bash
-curl -X GET http://34.74.53.63/visits/33dd6314-e9fa-48d5-be9b-4b189f05e660
+curl -X GET "http://34.74.53.63/visits/33dd6314-e9fa-48d5-be9b-4b189f05e660"
 ```
 
 ### Ping the service
@@ -58,7 +58,7 @@ GET /ping
 
 An example of how to use this in production is as follows:
 ```bash
-curl -X GET http://34.74.53.63/ping
+curl -X GET "http://34.74.53.63/ping"
 ```
 The user should receive a "PONG".
 
