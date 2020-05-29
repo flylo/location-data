@@ -39,6 +39,8 @@ curl -X GET "http://34.74.53.63/users/a5f72426-0d69-445d-89f2-6efabdd7f1f8/visit
 
 The max lookback window exists to allow for efficient filtering of visits.
 
+_NOTE: The "fuzziness" in the fuzzy-matching of the search is currently configured to be a Levenshtein distance of 3._
+
 ### Retrieve a single visit by visitId
 The following endpoint is exposed to fetch visits by their ID:
 ```
